@@ -1,107 +1,61 @@
 const express = require('express');
-const cors = require('cors');
+const RosApi = require('node-routeros').RouterOSAPI;
 const path = require('path');
-const { RouterOSClient } = require('node-routeros');
 
 const app = express();
-const PORT = process.env.PORT  3000;
 
- মিডলওয়্যার
-app.use(cors());
+// ৭ নম্বর লাইনটি সংশোধন করা হয়েছে (|| যোগ করা হয়েছে)
+const PORT = process.env.PORT || 3000;
+
+// মিডলওয়্যার
 app.use(express.json());
-app.use(express.urlencoded({ extended true }));
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
- MikroTik রাউটার কনফিগারেশন
-const ROUTER_CONFIG = {
-    host process.env.MIKROTIK_HOST  '103.54.37.182',
-    user process.env.MIKROTIK_USER  'smsbot',
-    password process.env.MIKROTIK_PASSWORD  '66778',
-    port parseInt(process.env.MIKROTIK_PORT  '8728')
-};
+// MikroTik কানেকশন ডিটেইলস (Render Environment Variables থেকে আসবে)
+const MIKROTIK_HOST = process.env.MIKROTIK_HOST;
+const MIKROTIK_USER = process.env.MIKROTIK_USER;
+const MIKROTIK_PASSWORD = process.env.MIKROTIK_PASSWORD;
+const MIKROTIK_PORT = parseInt(process.env.MIKROTIK_PORT, 10) || 8728;
 
- মেমোরিতে TrxID জমা রাখার ডেমো স্টোরেজ (প্রয়োজনে ডাটাবেজ ব্যবহার করতে পারেন)
- বিকাশনগদ এসএমএস রিসিভ হলে এখানে TrxID যুক্ত হবে
-let verifiedPayments = new Set(['TEST123456', 'BKASH9999']);
+// সাইন-আপ API এন্ডপয়েন্ট
+app.post('/api/signup', async (req, res) => {
+    const { username, password, profile } = req.body;
 
- ১. এসএমএস গেটওয়ে রুট (অটো এসএমএস আসলে এখানে জমা হবে)
-app.post('apisms-webhook', (req, res) = {
-    const { trxid } = req.body;
-    if (trxid) {
-        verifiedPayments.add(trxid.trim().toUpperCase());
-        console.log(`[SMS Log] নতুন TrxID সংরক্ষিত ${trxid}`);
-        return res.status(200).json({ status 'success', message 'TrxID logged' });
-    }
-    res.status(400).json({ status 'failed', message 'No TrxID provided' });
-});
-
- ২. ফ্রন্টএন্ড থেকে সাইন-আপ হ্যান্ডলার
-app.post('signup', async (req, res) = {
-    const { username, password, trxid } = req.body;
-
-    if (!username  !password  !trxid) {
-        return res.status(400).json({ 
-            success false, 
-            message 'মোবাইল নম্বর, পাসওয়ার্ড এবং TrxID দেওয়া বাধ্যতামূলক।' 
-        });
+    if (!username || !password) {
+        return res.status(400).json({ success: false, message: 'ইউজারনেম এবং পাসওয়ার্ড আবশ্যক!' });
     }
 
-    const cleanTrx = trxid.trim().toUpperCase();
-
-     ট্রানজেকশন আইডি ভেরিফিকেশন চেক
-    if (!verifiedPayments.has(cleanTrx)) {
-        return res.status(400).json({
-            success false,
-            message 'ট্রানজেকশন আইডিটি সঠিক নয় অথবা পেমেন্ট এখনও রিসিভ হয়নি।'
-        });
-    }
-
-     MikroTik Hotspot এ ইউজার তৈরি করা
-    const client = new RouterOSClient({
-        host ROUTER_CONFIG.host,
-        user ROUTER_CONFIG.user,
-        password ROUTER_CONFIG.password,
-        port ROUTER_CONFIG.port,
-        timeout 5000
+    const conn = new RosApi({
+        host: MIKROTIK_HOST,
+        user: MIKROTIK_USER,
+        password: MIKROTIK_PASSWORD,
+        port: MIKROTIK_PORT,
+        timeout: 10
     });
 
     try {
-        await client.connect();
+        await conn.connect();
 
-         Hotspot ইউজার তৈরি
-        await client.menu('ip hotspot user').add({
-            name username.trim(),
-            password password.trim(),
-            profile 'default',  আপনার রাউটারের প্রোফাইল নাম দিন (যেমন Profile-300GB)
-            comment `TrxID ${cleanTrx}`
-        });
+        // Hotspot ইউজার তৈরি করার কমান্ড
+        await conn.write('/ip/hotspot/user/add', [
+            `=name=${username}`,
+            `=password=${password}`,
+            `=profile=${profile || 'default'}`
+        ]);
 
-        await client.close();
-
-         একবার ব্যবহার করা TrxID মুছে দেওয়া (ডুপ্লিকেট রোধে)
-        verifiedPayments.delete(cleanTrx);
-
-        return res.status(200).json({
-            success true,
-            message 'অভিনন্দন! আপনার অ্যাকাউন্ট সক্রিয় হয়েছে। এখন হটস্পটে লগইন করুন।'
-        });
-
+        await conn.close();
+        return res.json({ success: true, message: 'ইউজার সফলভাবে তৈরি হয়েছে!' });
     } catch (error) {
-        if (client) try { await client.close(); } catch(e){}
-        console.error('MikroTik Error', error);
-
-        return res.status(500).json({
-            success false,
-            message 'রাউটারে অ্যাকাউন্ট তৈরি করা সম্ভব হয়নি ' + (error.message  'Error connecting to router')
-        });
+        console.error('MikroTik Error:', error);
+        try {
+            await conn.close();
+        } catch (e) {}
+        return res.status(500).json({ success: false, message: 'রাউটারে কানেক্ট বা ইউজার তৈরি করতে ব্যর্থ হয়েছে।' });
     }
 });
 
- রুট পাথ লোড হলে index.html দেখাবে
-app.get('', (req, res) = {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-app.listen(PORT, () = {
-    console.log(`সার্ভার চালু আছে httplocalhost${PORT}`);
+// সার্ভার চালু করা
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
 });
