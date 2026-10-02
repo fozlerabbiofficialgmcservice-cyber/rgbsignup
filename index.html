@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RGB Hotspot Sign Up</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background: #090d16;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* Animated Glowing RGB Card */
+        .rgb-card {
+            position: relative;
+            width: 100%;
+            max-width: 420px;
+            padding: 3px;
+            border-radius: 20px;
+            background: linear-gradient(60deg, #ff007f, #7928ca, #0070f3, #00dfd8, #43e97b, #fa709a, #ff007f);
+            background-size: 300% 300%;
+            animation: rgbFlow 5s ease infinite;
+            box-shadow: 0 0 25px rgba(0, 112, 243, 0.35);
+        }
+
+        @keyframes rgbFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .card-inner {
+            background: #111827;
+            padding: 32px 26px;
+            border-radius: 17px;
+            color: #ffffff;
+        }
+
+        .title {
+            text-align: center;
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            color: #00f2fe;
+            margin-bottom: 20px;
+            text-shadow: 0 0 12px rgba(0, 242, 254, 0.4);
+        }
+
+        .payment-box {
+            background: #1f2937;
+            border: 1px solid #374151;
+            padding: 14px;
+            border-radius: 12px;
+            margin-bottom: 22px;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .payment-box b {
+            color: #38bdf8;
+        }
+
+        .number-highlight {
+            color: #f59e0b;
+            font-weight: bold;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+            color: #9ca3af;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 14px;
+            background: #1b2434;
+            border: 1px solid #2d3748;
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            border-color: #00f2fe;
+            box-shadow: 0 0 10px rgba(0, 242, 254, 0.3);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+            color: #0b0f19;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.2s;
+        }
+
+        .submit-btn:hover {
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.5);
+            transform: translateY(-1px);
+        }
+
+        .footer-text {
+            text-align: center;
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 16px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="rgb-card">
+    <div class="card-inner">
+        <h2 class="title">PORTAL SIGN UP</h2>
+
+        <div class="payment-box">
+            📌 <b>বিকাশ / নগদ (Send Money):</b> <span class="number-highlight">01339932887</span><br>
+            টাকা পাঠানোর পর মেসেজের TrxID নিচে দিন। যাচাই শেষে অ্যাকাউন্টটি চালু হবে।
+        </div>
+
+        <form id="signupForm" onsubmit="event.preventDefault(); handleSignUp();">
+            <div class="form-group">
+                <label for="username">মোবাইল নম্বর (ইউজারনেম)</label>
+                <input type="text" id="username" placeholder="01XXXXXXXXX" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">পাসওয়ার্ড</label>
+                <input type="password" id="password" placeholder="গোপন পাসওয়ার্ড দিন" required>
+            </div>
+
+            <div class="form-group">
+                <label for="trxid">ট্রানজেকশন আইডি (TrxID)</label>
+                <input type="text" id="trxid" placeholder="উদাহরণ: BK123456" required>
+            </div>
+
+            <button type="submit" class="submit-btn" id="btnSubmit">SIGN UP</button>
+        </form>
+
+        <p class="footer-text">After signing up, your payment will be verified.</p>
+    </div>
+</div>
+
+<script>
+async function handleSignUp() {
+    const userField = document.getElementById('username');
+    const passField = document.getElementById('password');
+    const trxField = document.getElementById('trxid');
+    const btn = document.getElementById('btnSubmit');
+
+    const username = userField.value.trim();
+    const password = passField.value.trim();
+    const trxid = trxField.value.trim();
+
+    if (!username || !password || !trxid) {
+        alert("সবগুলো তথ্য সঠিকভাবে পূরণ করুন।");
+        return;
+    }
+
+    btn.innerText = "ভেরিফাই হচ্ছে...";
+    btn.disabled = true;
+
+    try {
+        // একই সার্ভার হওয়ায় রিলেটিভ রুটেই কাজ করবে
+        const response = await fetch('/signup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password, trxid })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+            alert(data.message || "সাইন আপ সফল হয়েছে!");
+            document.getElementById('signupForm').reset();
+        } else {
+            alert(data.message || "ভেরিফিকেশন সম্পন্ন করা যায়নি।");
+        }
+    } catch (err) {
+        alert("সার্ভারে সংযোগ করা যাচ্ছে না! দয়া করে কিছু সময় পর আবার চেষ্টা করুন।");
+    } finally {
+        btn.innerText = "SIGN UP";
+        btn.disabled = false;
+    }
+}
+</script>
+
+</body>
+</html>
