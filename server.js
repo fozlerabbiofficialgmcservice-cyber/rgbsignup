@@ -16,19 +16,19 @@ const MIKROTIK_USER = process.env.MIKROTIK_USER;
 const MIKROTIK_PASSWORD = process.env.MIKROTIK_PASSWORD;
 const MIKROTIK_PORT = parseInt(process.env.MIKROTIK_PORT, 10) || 8728;
 
-// টেস্ট রুট
+// হেলথ চেক রুট
 app.get('/health', (req, res) => {
     res.json({ status: 'Server is running perfectly' });
 });
 
-// সাইন-আপ API রুট (User Manager এর জন্য)
+// User Manager এ ইউজার তৈরি করার API রুট
 app.post('/api/signup', async (req, res) => {
     const { username, password } = req.body;
 
     console.log(`Received signup request for user: ${username}`);
 
     if (!username || !password) {
-        return res.status(400).json({ success: false, message: 'ইউজারনেম এবং পাসওয়ার্ড দিন।' });
+        return res.status(400).json({ success: false, message: 'ইউজারনেম এবং পাসওয়ার্ড আবশ্যক!' });
     }
 
     const conn = new RosApi({
@@ -44,7 +44,7 @@ app.post('/api/signup', async (req, res) => {
         await conn.connect();
         console.log('Connected to MikroTik successfully!');
 
-        // RouterOS v7 User Manager-এ ইউজার তৈরি করার কমান্ড
+        // RouterOS v7 User Manager এ ইউজার তৈরি করার কমান্ড
         await conn.write('/user-manager/user/add', [
             `=name=${username}`,
             `=password=${password}`
@@ -60,12 +60,13 @@ app.post('/api/signup', async (req, res) => {
         } catch (e) {}
         return res.status(500).json({ 
             success: false, 
-            message: 'User Manager-এ ইউজার তৈরি ব্যর্থ হয়েছে।',
+            message: 'User Manager-এ ইউজার তৈরি করা যায়নি বা সংযোগ ব্যর্থ হয়েছে।',
             error: error.message 
         });
     }
 });
 
+// সার্ভার চালু করা
 app.listen(PORT, () => {
     console.log(`Server started on port ${PORT}`);
 });
