@@ -1,200 +1,50 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RGB Sign Up</title>
-    <style>
-        :root {
-            --bg-color: #0f0f12;
-            --container-bg: rgba(20, 20, 25, 0.85);
-            --primary: #fff;
-            --rgb-red: #ff003c;
-            --rgb-green: #00ff66;
-            --rgb-blue: #0088ff;
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        .rgb-glow {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: conic-gradient(
-                var(--rgb-red), 
-                var(--rgb-green), 
-                var(--rgb-blue), 
-                var(--rgb-red)
-            );
-            filter: blur(100px);
-            opacity: 0.15;
-            z-index: -1;
-            animation: rotate 15s linear infinite;
-        }
-
-        @keyframes rotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .container {
-            background-color: var(--container-bg);
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            width: 350px;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            position: relative;
-        }
-
-        .container::before {
-            content: '';
-            position: absolute;
-            top: -2px; left: -2px; right: -2px; bottom: -2px;
-            background: linear-gradient(45deg, var(--rgb-red), var(--rgb-green), var(--rgb-blue));
-            border-radius: 21px;
-            z-index: -1;
-            opacity: 0.7;
-            background-size: 400%;
-            animation: animateBorder 20s linear infinite;
-        }
-
-        @keyframes animateBorder {
-            0% { background-position: 0 0; }
-            50% { background-position: 400% 0; }
-            100% { background-position: 0 0; }
-        }
-
-        h2 {
-            color: var(--primary);
-            margin-bottom: 25px;
-            font-weight: 300;
-            letter-spacing: 2px;
-        }
-
-        .input-group {
-            margin-bottom: 20px;
-            text-align: left;
-        }
-
-        label {
-            display: block;
-            color: #8f8f9d;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-
-        input {
-            width: 100%;
-            padding: 12px;
-            box-sizing: border-box;
-            background: #121216;
-            border: 1px solid #2a2a35;
-            border-radius: 10px;
-            color: var(--primary);
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: var(--rgb-blue);
-            box-shadow: 0 0 10px rgba(0, 136, 255, 0.3);
-        }
-
-        button {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(45deg, var(--rgb-red), var(--rgb-green), var(--rgb-blue));
-            color: var(--primary);
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 20px;
-            transition: transform 0.2s;
-            background-size: 200%;
-            animation: animateBorder 20s linear infinite;
-        }
-
-        button:hover {
-            transform: translateY(-2px);
-        }
-
-        .info-text {
-            color: #8f8f9d;
-            font-size: 12px;
-            margin-top: 15px;
-        }
-    </style>
-</head>
-<body>
-    <div class="rgb-glow"></div>
-    <div class="container">
-        <h2>PORTAL SIGN UP</h2>
-        <form id="signupForm">
-            <div class="input-group">
-                <label for="mobile">Mobile Number</label>
-                <input type="text" id="mobile" required placeholder="Enter your mobile number">
-            </div>
-            <div class="input-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" required placeholder="Create a password">
-            </div>
-            <div class="input-group">
-                <label for="trxId">Transaction ID</label>
-                <input type="text" id="trxId" required placeholder="Enter TrxID">
-            </div>
-            <button type="submit">SIGN UP</button>
-        </form>
-        <p class="info-text">After signing up, your payment will be verified.</p>
+<form id="signupForm">
+    <div>
+        <label>Mobile Number</label>
+        <input type="text" id="username" placeholder="01XXXXXXXXX" required>
     </div>
 
-    <script>
-        document.getElementById('signupForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const mobile = document.getElementById('mobile').value;
-            const password = document.getElementById('password').value;
-            const trxId = document.getElementById('trxId').value;
+    <div>
+        <label>Password</label>
+        <input type="password" id="password" placeholder="Enter password" required>
+    </div>
 
-            try {
-                const response = await fetch('https://faznetwork.onrender.com/api/signup', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        username: mobile,
-                        password: password,
-                        trxId: trxId
-                    })
-                });
+    <div>
+        <label>Transaction ID</label>
+        <input type="text" id="trxid" placeholder="Enter TrxID" required>
+    </div>
 
-                const data = await response.json();
+    <button type="button" onclick="handleSignup()">SIGN UP</button>
+</form>
 
-                if (data.success) {
-                    alert(data.message);
-                    // চাইলে এখানে অন্য কোনো পেজে রিডাইরেক্ট করতে পারেন
-                } else {
-                    alert(data.message);
-                }
-            } catch (err) {
-                console.error('Error:', err);
-                alert('An error occurred. Please try again later.');
-            }
+<script>
+async function handleSignup() {
+    // সঠিক id অনুযায়ী ভ্যালু নেওয়া
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const trxid = document.getElementById('trxid').value.trim();
+
+    if (!username || !password) {
+        alert("ইউজারনেম ও পাসওয়ার্ড দেওয়া বাধ্যতামূলক।");
+        return;
+    }
+
+    if (!trxid) {
+        alert("ট্রানজেকশন আইডি দেওয়া বাধ্যতামূলক।");
+        return;
+    }
+
+    // ব্যাকএন্ড API-তে ডাটা পাঠানো
+    try {
+        const response = await fetch('/api/signup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password, trxid })
         });
-    </script>
-</body>
-</html>
+        const data = await response.json();
+        alert(data.message || "প্রক্রিয়া সম্পন্ন হয়েছে");
+    } catch (err) {
+        alert("সার্ভারে সংযোগ করা যাচ্ছে না!");
+    }
+}
+</script>
