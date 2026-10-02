@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RGB Sign Up</title>
+    <style>
+        :root {
+            --bg-color: #0f0f12;
+            --container-bg: rgba(20, 20, 25, 0.85);
+            --primary: #fff;
+            --rgb-red: #ff003c;
+            --rgb-green: #00ff66;
+            --rgb-blue: #0088ff;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .rgb-glow {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: conic-gradient(
+                var(--rgb-red), 
+                var(--rgb-green), 
+                var(--rgb-blue), 
+                var(--rgb-red)
+            );
+            filter: blur(100px);
+            opacity: 0.15;
+            z-index: -1;
+            animation: rotate 15s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .container {
+            background-color: var(--container-bg);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            width: 350px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -2px; left: -2px; right: -2px; bottom: -2px;
+            background: linear-gradient(45deg, var(--rgb-red), var(--rgb-green), var(--rgb-blue));
+            border-radius: 21px;
+            z-index: -1;
+            opacity: 0.7;
+            background-size: 400%;
+            animation: animateBorder 20s linear infinite;
+        }
+
+        @keyframes animateBorder {
+            0% { background-position: 0 0; }
+            50% { background-position: 400% 0; }
+            100% { background-position: 0 0; }
+        }
+
+        h2 {
+            color: var(--primary);
+            margin-bottom: 25px;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            color: #8f8f9d;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            box-sizing: border-box;
+            background: #121216;
+            border: 1px solid #2a2a35;
+            border-radius: 10px;
+            color: var(--primary);
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--rgb-blue);
+            box-shadow: 0 0 10px rgba(0, 136, 255, 0.3);
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(45deg, var(--rgb-red), var(--rgb-green), var(--rgb-blue));
+            color: var(--primary);
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.2s;
+            background-size: 200%;
+            animation: animateBorder 20s linear infinite;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        .info-text {
+            color: #8f8f9d;
+            font-size: 12px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="rgb-glow"></div>
+    <div class="container">
+        <h2>PORTAL SIGN UP</h2>
+        <div class="input-group">
+            <label for="mobile">Mobile Number</label>
+            <input type="text" id="mobile" placeholder="Enter your mobile number">
+        </div>
+        <div class="input-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="Create a password">
+        </div>
+        <button onclick="alert('Proceed to Send Money & Verify')">SIGN UP</button>
+        <p class="info-text">After signing up, you will be directed to make a payment.</p>
+    </div>
+</body>
+</html>
