@@ -143,16 +143,58 @@
     <div class="rgb-glow"></div>
     <div class="container">
         <h2>PORTAL SIGN UP</h2>
-        <div class="input-group">
-            <label for="mobile">Mobile Number</label>
-            <input type="text" id="mobile" placeholder="Enter your mobile number">
-        </div>
-        <div class="input-group">
-            <label for="password">Password</label>
-            <input type="password" id="password" placeholder="Create a password">
-        </div>
-        <button onclick="alert('Proceed to Send Money & Verify')">SIGN UP</button>
-        <p class="info-text">After signing up, you will be directed to make a payment.</p>
+        <form id="signupForm">
+            <div class="input-group">
+                <label for="mobile">Mobile Number</label>
+                <input type="text" id="mobile" required placeholder="Enter your mobile number">
+            </div>
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" required placeholder="Create a password">
+            </div>
+            <div class="input-group">
+                <label for="trxId">Transaction ID</label>
+                <input type="text" id="trxId" required placeholder="Enter TrxID">
+            </div>
+            <button type="submit">SIGN UP</button>
+        </form>
+        <p class="info-text">After signing up, your payment will be verified.</p>
     </div>
+
+    <script>
+        document.getElementById('signupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const mobile = document.getElementById('mobile').value;
+            const password = document.getElementById('password').value;
+            const trxId = document.getElementById('trxId').value;
+
+            try {
+                const response = await fetch('https://faznetwork.onrender.com/api/signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: mobile,
+                        password: password,
+                        trxId: trxId
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert(data.message);
+                    // চাইলে এখানে অন্য কোনো পেজে রিডাইরেক্ট করতে পারেন
+                } else {
+                    alert(data.message);
+                }
+            } catch (err) {
+                console.error('Error:', err);
+                alert('An error occurred. Please try again later.');
+            }
+        });
+    </script>
 </body>
 </html>
