@@ -21,9 +21,9 @@ app.get('/health', (req, res) => {
     res.json({ status: 'Server is running perfectly' });
 });
 
-// সাইন-আপ API রুট
+// সাইন-আপ API রুট (User Manager এর জন্য)
 app.post('/api/signup', async (req, res) => {
-    const { username, password, profile } = req.body;
+    const { username, password } = req.body;
 
     console.log(`Received signup request for user: ${username}`);
 
@@ -44,15 +44,14 @@ app.post('/api/signup', async (req, res) => {
         await conn.connect();
         console.log('Connected to MikroTik successfully!');
 
-        // Hotspot ইউজার অ্যাড করা
-        await conn.write('/ip/hotspot/user/add', [
+        // RouterOS v7 User Manager-এ ইউজার তৈরি করার কমান্ড
+        await conn.write('/user-manager/user/add', [
             `=name=${username}`,
-            `=password=${password}`,
-            `=profile=${profile || 'default'}`
+            `=password=${password}`
         ]);
 
         await conn.close();
-        console.log(`User ${username} added to MikroTik!`);
+        console.log(`User ${username} added to User Manager!`);
         return res.json({ success: true, message: 'ইউজার সফলভাবে তৈরি হয়েছে!' });
     } catch (error) {
         console.error('MikroTik Error Details:', error);
@@ -61,7 +60,7 @@ app.post('/api/signup', async (req, res) => {
         } catch (e) {}
         return res.status(500).json({ 
             success: false, 
-            message: 'মাইক্রোটিকে সংযোগ করা যায়নি বা ইউজার তৈরি ব্যর্থ হয়েছে।',
+            message: 'User Manager-এ ইউজার তৈরি ব্যর্থ হয়েছে।',
             error: error.message 
         });
     }
